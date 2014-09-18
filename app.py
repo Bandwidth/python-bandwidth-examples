@@ -69,14 +69,14 @@ def handle_event():
                                    prompt={'sentence': 'Please enter your 5 digit code', 'loop_enabled': True},
                                    tag='gather_started')
             elif event.tag == 'gather_complete':
-                outgoing_call = Call.create(CALLER, BRIDGE_CALLEE,
-                                            callback_url='http://{}{}'.format(DOMAIN, '/events/bridged'),
-                                            tag='other-leg:{}'.format(call.call_id))
-                Bridge.create(call, outgoing_call)
+                Call.create(CALLER, BRIDGE_CALLEE,
+                            callback_url='http://{}{}'.format(DOMAIN, '/events/bridged'),
+                            tag='other-leg:{}'.format(call.call_id))
             elif event.tag == 'terminating':
                 call.hangup()
 
     elif isinstance(event, GatherCallEvent):
+        event.gather.stop()
         call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.digits),
                             gender='male',
                             tag='gather_complete')
@@ -98,7 +98,11 @@ def handle_event():
 @app.route('/events/bridged', methods=['POST'])
 def handle_bridged_leg():
     event = Event.create(**request.get_json())
-    if isinstance(event, HangupCallEvent):
+    call = event.call
+    if isinstance(event, AnswerCallEvent):
+        other_call_id = event.tag.split(':')[-1]
+        Bridge.create(call, Call(other_call_id))
+    elif isinstance(event, HangupCallEvent):
         logger.debug('Call ended')
         call_id = event.tag.split(':')[-1]
         Call(call_id).hangup()

@@ -19,9 +19,10 @@ BRIDGE_CALLEE = os.environ.get('CALLER_NUMBER')
 
 DOMAIN = os.environ.get('DOMAIN')
 
-APP_CALL_URL = 'http://{}{}'.format(DOMAIN, '/events/bridged')
+APP_CALL_URL = 'http://{}{}'.format(DOMAIN, '/events')
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 logging.basicConfig(level='DEBUG', format="%(levelname)s [%(name)s:%(lineno)s] %(message)s")
 # ----------------------------------------------------------------------------#
 # Controllers.
@@ -39,7 +40,7 @@ def start_call():
     callee = inc.get('to')
     if not callee:
         return jsonify('number field is required'), 400
-    Call.create(CALLER, callee, recording_enabled=True, callback_url=APP_CALL_URL)
+    Call.create(CALLER, callee, recording_enabled=False, callback_url=APP_CALL_URL)
     return jsonify({}), 201
 
 

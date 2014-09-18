@@ -41,7 +41,7 @@ def start_call():
     inc = request.get_json()
     callee = inc.get('to')
     if not callee:
-        return jsonify('number field is required'), 400
+        return jsonify({'message': 'number field is required'}), 400
     Call.create(CALLER, callee, recording_enabled=False, callback_url=APP_CALL_URL)
     return jsonify({}), 201
 
@@ -74,6 +74,7 @@ def handle_event():
                 call.hangup()
 
     elif isinstance(event, GatherCallEvent):
+        logger.debug('%s', vars(event.gather))
         if event.digits:
             call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.digits),
                                 gender='male',

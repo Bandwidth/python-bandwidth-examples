@@ -69,11 +69,17 @@ def handle_event():
                 bridge.call_party(CALLER, BRIDGE_CALLEE,
                                   callback_url='http://{}{}'.format(DOMAIN, '/events/bridged'),
                                   tag='bridge-id:{}'.format(bridge.id))
+            elif event.tag == 'terminating':
+                call.hangup()
 
     elif isinstance(event, GatherCallEvent):
-        call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.dtmf_digits),
-                            gender='male',
-                            tag='gather_complete')
+        if event.dtmf_digits:
+            call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.dtmf_digits),
+                                gender='male',
+                                tag='gather_complete')
+        else:
+            call.speak_sentence('We are sorry your input is not valid. The call will be terminated',
+                                gender='female', tag='terminating')
 
     elif isinstance(event, HangupCallEvent):
         logger.debug('Call ended')

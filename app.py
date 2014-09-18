@@ -78,9 +78,7 @@ def handle_event():
     elif isinstance(event, HangupCallEvent):
         logger.debug('Call ended')
     else:
-        """
-        Anything else ...
-        """
+        logger.debug('Skipping %s', event)
     return '', 200
 
 

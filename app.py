@@ -73,8 +73,8 @@ def handle_event():
                 call.hangup()
 
     elif isinstance(event, GatherCallEvent):
-        if event.dtmf_digits:
-            call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.dtmf_digits),
+        if event.digits:
+            call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.digits),
                                 gender='male',
                                 tag='gather_complete')
         else:

@@ -17,7 +17,7 @@ from bandwidth_sdk import (Call, Event, Bridge, AnswerCallEvent,
 app = Flask(__name__)
 # app.config.from_object('config')
 CALLER = os.environ.get('CALLER_NUMBER')
-BRIDGE_CALLEE = os.environ.get('CALLER_NUMBER')
+BRIDGE_CALLEE = os.environ.get('BRIDGE_CALLEE')
 
 DOMAIN = os.environ.get('DOMAIN')
 

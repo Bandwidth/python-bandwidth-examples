@@ -51,17 +51,19 @@ def handle_event():
     event = Event.create(**request.get_json())
     call = event.call
     logger.debug('Processing %s', event)
+    logger.debug('In dict: %s', vars(event))
     if isinstance(event, AnswerCallEvent):
         call.speak_sentence('Hello from test application', gender='female', tag='greeting')
     elif isinstance(event, SpeakCallEvent):
-        logger.debug('Playback received')
+        logger.debug('Speak event received')
         if event.done:
             if event.tag == 'greeting':
                 logger.debug('Starting dtmf gathering')
                 call.gather.create(max_digits='5',
                                    terminating_digits='*',
                                    inter_digit_timeout='7',
-                                   prompt={'sentence': 'Please enter your 5 digit code', 'loop_enabled': True})
+                                   prompt={'sentence': 'Please enter your 5 digit code', 'loop_enabled': True},
+                                   tag='gather_started')
             elif event.tag == 'gather_complete':
                 bridge = Bridge.create(call)
                 bridge.call_party(CALLER, BRIDGE_CALLEE,

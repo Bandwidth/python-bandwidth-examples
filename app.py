@@ -60,7 +60,7 @@ def handle_event():
                                 'we want to make sure that you are a human', gender='female', tag='human_validation')
 
     elif isinstance(event, DtmfCallEvent):
-        if event.tag == 'human_validation' and event.dtmf_digit == '1':
+        if event.dtmf_digit == '1':
             call.speak_sentence('Thank you.',
                                 gender='female', tag='greeting_done')
         else:

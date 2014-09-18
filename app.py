@@ -8,7 +8,7 @@ from flask import Flask, request, jsonify
 
 from bandwidth_sdk import (Call, Event, Bridge, AnswerCallEvent,
                            PlaybackCallEvent, HangupCallEvent,
-                           GatherCallEvent, SpeakCallEvent)
+                           GatherCallEvent, SpeakCallEvent, DtmfCallEvent)
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -56,12 +56,21 @@ def handle_event():
     if isinstance(event, AnswerCallEvent):
         if not event.tag:
             # Call have just started
-            call.speak_sentence('Hello from test application', gender='female', tag='greeting')
+            call.speak_sentence('Hello from test application, press 1 to continue, '
+                                'we want to make sure that you are a human', gender='female', tag='human_validation')
+
+    elif isinstance(event, DtmfCallEvent):
+        if event.tag == 'human_validation' and event.dtmf_digit == '1':
+            call.speak_sentence('Thank you.',
+                                gender='female', tag='greeting_done')
+        else:
+            call.speak_sentence('We are sorry your input is not valid. The call will be terminated',
+                                gender='female', tag='terminating')
 
     elif isinstance(event, SpeakCallEvent):
         logger.debug('Speak event received')
         if event.done:
-            if event.tag == 'greeting':
+            if event.tag == 'greeting_done':
                 logger.debug('Starting dtmf gathering')
                 call.gather.create(max_digits='5',
                                    terminating_digits='*',

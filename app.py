@@ -54,7 +54,10 @@ def handle_event():
     logger.debug('Processing %s', event)
     logger.debug('In dict: %s', vars(event))
     if isinstance(event, AnswerCallEvent):
-        call.speak_sentence('Hello from test application', gender='female', tag='greeting')
+        if not event.tag:
+            # Call have just started
+            call.speak_sentence('Hello from test application', gender='female', tag='greeting')
+
     elif isinstance(event, SpeakCallEvent):
         logger.debug('Speak event received')
         if event.done:
@@ -66,22 +69,24 @@ def handle_event():
                                    prompt={'sentence': 'Please enter your 5 digit code', 'loop_enabled': True},
                                    tag='gather_started')
             elif event.tag == 'gather_complete':
-                bridge = Bridge.create(call)
-                bridge.call_party(CALLER, BRIDGE_CALLEE,
-                                  callback_url='http://{}{}'.format(DOMAIN, '/events/bridged'),
-                                  tag='bridge-id:{}'.format(bridge.id))
+                outgoing_call = Call.create(CALLER, BRIDGE_CALLEE,
+                                            callback_url='http://{}{}'.format(DOMAIN, '/events/bridged'),
+                                            tag='other-leg:{}'.format(call.call_id))
+                Bridge.create(call, outgoing_call)
             elif event.tag == 'terminating':
                 call.hangup()
 
     elif isinstance(event, GatherCallEvent):
-        logger.debug('%s', vars(event.gather))
-        if event.digits:
-            call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.digits),
-                                gender='male',
-                                tag='gather_complete')
-        else:
-            call.speak_sentence('We are sorry your input is not valid. The call will be terminated',
-                                gender='female', tag='terminating')
+        call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.digits),
+                            gender='male',
+                            tag='gather_complete')
+        # if event.digits:
+        #     call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.digits),
+        #                         gender='male',
+        #                         tag='gather_complete')
+        # else:
+        #     call.speak_sentence('We are sorry your input is not valid. The call will be terminated',
+        #                         gender='female', tag='terminating')
 
     elif isinstance(event, HangupCallEvent):
         logger.debug('Call ended')
@@ -93,15 +98,10 @@ def handle_event():
 @app.route('/events/bridged', methods=['POST'])
 def handle_bridged_leg():
     event = Event.create(**request.get_json())
-    call = event.call
     if isinstance(event, HangupCallEvent):
         logger.debug('Call ended')
-        bridge_id = event.tag.split(':')[-1]
-        bridge = Bridge(bridge_id)
-        calls = bridge.fetch_calls()
-        for c in calls:
-            if call.call_id != c.call_id:
-                c.hangup()
+        call_id = event.tag.split(':')[-1]
+        Call(call_id).hangup()
     return '', 200
 
 

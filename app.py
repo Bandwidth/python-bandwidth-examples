@@ -50,6 +50,7 @@ def start_call():
 def handle_event():
     event = Event.create(**request.get_json())
     call = event.call
+    logger.debug('Input> : %s', request.get_json())
     logger.debug('Processing %s', event)
     logger.debug('In dict: %s', vars(event))
     if isinstance(event, AnswerCallEvent):

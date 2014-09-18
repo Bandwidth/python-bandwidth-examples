@@ -6,7 +6,9 @@ import logging
 
 from flask import Flask, request, jsonify
 
-from bandwidth_sdk import Call, Event, Bridge, AnswerCallEvent, PlaybackCallEvent, HangupCallEvent, GatherCallEvent
+from bandwidth_sdk import (Call, Event, Bridge, AnswerCallEvent,
+                           PlaybackCallEvent, HangupCallEvent,
+                           GatherCallEvent, SpeakCallEvent)
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -51,7 +53,7 @@ def handle_event():
     logger.debug('Processing %s', event)
     if isinstance(event, AnswerCallEvent):
         call.speak_sentence('Hello from test application', gender='female', tag='greeting')
-    elif isinstance(event, PlaybackCallEvent):
+    elif isinstance(event, SpeakCallEvent):
         logger.debug('Playback received')
         if event.done:
             if event.tag == 'greeting':

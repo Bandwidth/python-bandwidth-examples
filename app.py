@@ -21,6 +21,7 @@ DOMAIN = os.environ.get('DOMAIN')
 
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(level='DEBUG', format="%(levelname)s [%(name)s:%(lineno)s] %(message)s")
 # ----------------------------------------------------------------------------#
 # Controllers.
 # ----------------------------------------------------------------------------#
@@ -92,9 +93,9 @@ def handle_bridged_leg():
 
 
 # Error handlers.
-@app.errorhandler(500)
-def internal_error(error):
-    return 'error occurred', 500
+# @app.errorhandler(500)
+# def internal_error(error):
+#     return 'error occurred', 500
 
 
 @app.errorhandler(404)

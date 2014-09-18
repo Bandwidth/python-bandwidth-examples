@@ -19,6 +19,7 @@ BRIDGE_CALLEE = os.environ.get('CALLER_NUMBER')
 
 DOMAIN = os.environ.get('DOMAIN')
 
+APP_CALL_URL = 'http://{}{}'.format(DOMAIN, '/events/bridged')
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level='DEBUG', format="%(levelname)s [%(name)s:%(lineno)s] %(message)s")
@@ -38,8 +39,8 @@ def start_call():
     callee = inc.get('to')
     if not callee:
         return jsonify('number field is required'), 400
-    Call.create(CALLER, callee, recording_enabled=True)
-    return jsonify('Created'), 201
+    Call.create(CALLER, callee, recording_enabled=True, call_back_url=APP_CALL_URL)
+    return jsonify({}), 201
 
 
 @app.route('/events', methods=['POST'])
@@ -60,8 +61,9 @@ def handle_event():
                                    prompt={'sentence': 'Please enter your 5 digit code', 'loop_enabled': True})
             elif event.tag == 'gather_complete':
                 bridge = Bridge.create(call)
-                app_url = 'http://{}{}'.format(DOMAIN, '/events/bridged')
-                bridge.call_party(CALLER, BRIDGE_CALLEE, call_back_url=app_url, tag='bridge-id:{}'.format(bridge.id))
+                bridge.call_party(CALLER, BRIDGE_CALLEE,
+                                  call_back_url=APP_CALL_URL,
+                                  tag='bridge-id:{}'.format(bridge.id))
 
     elif isinstance(event, GatherCallEvent):
         call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.dtmf_digits),

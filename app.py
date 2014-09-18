@@ -39,7 +39,7 @@ def start_call():
     callee = inc.get('to')
     if not callee:
         return jsonify('number field is required'), 400
-    Call.create(CALLER, callee, recording_enabled=True, call_back_url=APP_CALL_URL)
+    Call.create(CALLER, callee, recording_enabled=True, callback_url=APP_CALL_URL)
     return jsonify({}), 201
 
 

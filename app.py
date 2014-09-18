@@ -67,7 +67,7 @@ def handle_event():
             elif event.tag == 'gather_complete':
                 bridge = Bridge.create(call)
                 bridge.call_party(CALLER, BRIDGE_CALLEE,
-                                  call_back_url=APP_CALL_URL,
+                                  callback_url=APP_CALL_URL,
                                   tag='bridge-id:{}'.format(bridge.id))
 
     elif isinstance(event, GatherCallEvent):

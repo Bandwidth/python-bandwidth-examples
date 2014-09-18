@@ -103,9 +103,13 @@ def handle_bridged_leg():
         other_call_id = event.tag.split(':')[-1]
         Bridge.create(call, Call(other_call_id))
     elif isinstance(event, HangupCallEvent):
-        logger.debug('Call ended')
-        call_id = event.tag.split(':')[-1]
-        Call(call_id).hangup()
+        other_call_id = event.tag.split(':')[-1]
+        if event.cause == "CALL_REJECTED":
+            Call(other_call_id).speak_sentence('We are sorry, the user is reject your call',
+                                               gender='female',
+                                               tag='terminating')
+        else:
+            Call(other_call_id).hangup()
     return '', 200
 
 

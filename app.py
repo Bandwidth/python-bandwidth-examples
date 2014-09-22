@@ -8,7 +8,7 @@ import redis
 
 from flask import Flask, request, jsonify
 from flask.views import View
-from rq import Queue
+from rq import Queue, use_connection
 
 from bandwidth_sdk import (Call, Event, Bridge)
 
@@ -32,6 +32,7 @@ logging.basicConfig(level='DEBUG', format="%(levelname)s [%(name)s:%(lineno)s] %
 redis_url = os.getenv('REDISCLOUD_URL', 'redis://localhost:6379')
 
 conn = redis.from_url(redis_url)
+use_connection(conn)
 # ----------------------------------------------------------------------------#
 # Controllers.
 # ----------------------------------------------------------------------------#
@@ -62,7 +63,7 @@ class EventsHandler(View):
 class CallEvents(EventsHandler):
 
     def async(self, func, *args, **kwargs):
-        q = Queue('default', connection=conn)
+        q = Queue('default')
         params = kwargs.pop('params', {})
         return q.enqueue_call(func, args, kwargs, **params)
 
@@ -124,7 +125,7 @@ class CallEvents(EventsHandler):
 class BridgedLegEvents(EventsHandler):
 
     def async(self, func, args=None, kwargs=None, **params):
-        q = Queue('default', connection=conn)
+        q = Queue('default')
         return q.enqueue_call(func, args, kwargs, **params)
 
     def answer(self):

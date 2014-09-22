@@ -5,10 +5,9 @@ import os
 import logging
 
 from flask import Flask, request, jsonify
+from flask.views import View
 
-from bandwidth_sdk import (Call, Event, Bridge, AnswerCallEvent,
-                           PlaybackCallEvent, HangupCallEvent,
-                           GatherCallEvent, SpeakCallEvent, DtmfCallEvent)
+from bandwidth_sdk import (Call, Event, Bridge)
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -36,6 +35,102 @@ def home():
     return 'Its works'
 
 
+class EventsHandler(View):
+    methods = ['POST']
+    event = None
+
+    def dispatch_request(self):
+        try:
+            self.event = Event.create(**request.get_json())
+        except Exception:
+            return 'Malformed event', 400
+        logger.debug(self.event)
+        handler = getattr(self, self.event.event_type, self.not_implemented)
+        return handler()
+
+    def not_implemented(self):
+        return '', 200
+
+
+class CallEvents(EventsHandler):
+
+    def answer(self):
+        if self.event.tag:
+            call = self.event.call
+            call.speak_sentence('Hello from test application, press 1 to continue, '
+                                'we want to make sure that you are a human', gender='female', tag='human_validation')
+        return ''
+
+    def dtmf(self):
+        call = self.event.call
+        if self.event.dtmf_digit == '1':
+            call.speak_sentence('Thank you.',
+                                gender='female', tag='greeting_done')
+        else:
+            call.speak_sentence('We are sorry your input is not valid. The call will be terminated',
+                                gender='female', tag='terminating')
+        return ''
+
+    def speak(self):
+        event = self.event
+        if not event.done:
+            return ''
+        call = self.event.call
+        if event.tag == 'greeting_done':
+            logger.debug('Starting dtmf gathering')
+            call.gather.create(max_digits='5',
+                               terminating_digits='*',
+                               inter_digit_timeout='7',
+                               prompt={'sentence': 'Please enter your 5 digit code', 'loop_enabled': True},
+                               tag='gather_started')
+        elif event.tag == 'gather_complete':
+            Call.create(CALLER, BRIDGE_CALLEE,
+                        callback_url='http://{}{}'.format(DOMAIN, '/events/bridged'),
+                        tag='other-leg:{}'.format(call.call_id))
+        elif event.tag == 'terminating':
+            call.hangup()
+        return ''
+
+    def gather(self):
+        self.event.gather.stop()
+        self.event.call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.digits),
+                                       gender='male',
+                                       tag='gather_complete')
+        return ''
+
+    def hangup(self):
+        # Creating cdr
+        return ''
+
+
+class BridgedLegEvents(EventsHandler):
+
+    def answer(self):
+        """
+        :return:
+        """
+        other_call_id = self.event.tag.split(':')[-1]
+        Bridge.create(self.event.call, Call(other_call_id))
+        return ''
+
+    def hangup(self):
+        """
+        :return:
+        """
+        other_call_id = self.event.tag.split(':')[-1]
+        if self.event.cause == "CALL_REJECTED":
+            Call(other_call_id).speak_sentence('We are sorry, the user is reject your call',
+                                               gender='female',
+                                               tag='terminating')
+        else:
+            Call(other_call_id).hangup()
+        return ''
+
+
+app.add_url_rule('/events', view_func=CallEvents.as_view('call_events'))
+app.add_url_rule('/events/bridged', view_func=BridgedLegEvents.as_view('bridged_call_events'))
+
+
 @app.route('/start/call', methods=['POST'])
 def start_call():
     inc = request.get_json()
@@ -44,82 +139,6 @@ def start_call():
         return jsonify({'message': 'number field is required'}), 400
     Call.create(CALLER, callee, recording_enabled=False, callback_url=APP_CALL_URL)
     return jsonify({}), 201
-
-
-@app.route('/events', methods=['POST'])
-def handle_event():
-    event = Event.create(**request.get_json())
-    call = event.call
-    logger.debug('Input> : %s', request.get_json())
-    logger.debug('Processing %s', event)
-    logger.debug('In dict: %s', vars(event))
-    if isinstance(event, AnswerCallEvent):
-        if not event.tag:
-            # Call have just started
-            call.speak_sentence('Hello from test application, press 1 to continue, '
-                                'we want to make sure that you are a human', gender='female', tag='human_validation')
-
-    elif isinstance(event, DtmfCallEvent):
-        if event.dtmf_digit == '1':
-            call.speak_sentence('Thank you.',
-                                gender='female', tag='greeting_done')
-        else:
-            call.speak_sentence('We are sorry your input is not valid. The call will be terminated',
-                                gender='female', tag='terminating')
-
-    elif isinstance(event, SpeakCallEvent):
-        logger.debug('Speak event received')
-        if event.done:
-            if event.tag == 'greeting_done':
-                logger.debug('Starting dtmf gathering')
-                call.gather.create(max_digits='5',
-                                   terminating_digits='*',
-                                   inter_digit_timeout='7',
-                                   prompt={'sentence': 'Please enter your 5 digit code', 'loop_enabled': True},
-                                   tag='gather_started')
-            elif event.tag == 'gather_complete':
-                Call.create(CALLER, BRIDGE_CALLEE,
-                            callback_url='http://{}{}'.format(DOMAIN, '/events/bridged'),
-                            tag='other-leg:{}'.format(call.call_id))
-            elif event.tag == 'terminating':
-                call.hangup()
-
-    elif isinstance(event, GatherCallEvent):
-        event.gather.stop()
-        call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.digits),
-                            gender='male',
-                            tag='gather_complete')
-        # if event.digits:
-        #     call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.digits),
-        #                         gender='male',
-        #                         tag='gather_complete')
-        # else:
-        #     call.speak_sentence('We are sorry your input is not valid. The call will be terminated',
-        #                         gender='female', tag='terminating')
-
-    elif isinstance(event, HangupCallEvent):
-        logger.debug('Call ended')
-    else:
-        logger.debug('Skipping %s', event)
-    return '', 200
-
-
-@app.route('/events/bridged', methods=['POST'])
-def handle_bridged_leg():
-    event = Event.create(**request.get_json())
-    call = event.call
-    if isinstance(event, AnswerCallEvent):
-        other_call_id = event.tag.split(':')[-1]
-        Bridge.create(call, Call(other_call_id))
-    elif isinstance(event, HangupCallEvent):
-        other_call_id = event.tag.split(':')[-1]
-        if event.cause == "CALL_REJECTED":
-            Call(other_call_id).speak_sentence('We are sorry, the user is reject your call',
-                                               gender='female',
-                                               tag='terminating')
-        else:
-            Call(other_call_id).hangup()
-    return '', 200
 
 
 # Error handlers.

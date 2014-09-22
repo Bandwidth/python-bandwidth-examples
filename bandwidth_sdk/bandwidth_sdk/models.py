@@ -32,6 +32,7 @@ class Gettable(object):
         return self.id
 
     def __setstate__(self, state):
+        print('%s restored' % self.__class__.__name__)
         self.id = state
         self.client = Client()
         return True

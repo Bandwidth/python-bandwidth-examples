@@ -261,6 +261,14 @@ class Call(AudioMixin, Resource):
         data = self.client.get(url).json()
         return [from_api(e) for e in data]
 
+    def __getstate__(self):
+        return self.call_id
+
+    def __setstate__(self, state):
+        self.call_id = state
+        self.client = Client()
+        return True
+
 
 class Application(Resource):
 

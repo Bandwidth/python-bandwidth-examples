@@ -28,6 +28,14 @@ class Gettable(object):
             if k in self._fields:
                 setattr(self, k, v)
 
+    def __getstate__(self):
+        return self.id
+
+    def __setstate__(self, state):
+        self.id = state
+        self.client = Client()
+        return True
+
 
 class Resource(Gettable):
     client = None

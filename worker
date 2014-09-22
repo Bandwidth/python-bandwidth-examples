@@ -1,1 +1,1 @@
-rqworker default
+rqworker default -u=$REDISCLOUD_URL

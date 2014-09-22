@@ -4,8 +4,11 @@
 import os
 import logging
 
+import redis
+
 from flask import Flask, request, jsonify
 from flask.views import View
+from rq import Queue
 
 from bandwidth_sdk import (Call, Event, Bridge)
 
@@ -25,6 +28,10 @@ APP_CALL_URL = 'http://{}{}'.format(DOMAIN, '/events')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logging.basicConfig(level='DEBUG', format="%(levelname)s [%(name)s:%(lineno)s] %(message)s")
+
+redis_url = os.getenv('REDISCLOUD_URL', 'redis://localhost:6379')
+
+conn = redis.from_url(redis_url)
 # ----------------------------------------------------------------------------#
 # Controllers.
 # ----------------------------------------------------------------------------#
@@ -54,20 +61,26 @@ class EventsHandler(View):
 
 class CallEvents(EventsHandler):
 
+    def async(self, func, args=None, kwargs=None, **params):
+        q = Queue('default', connection=conn)
+        return q.enqueue_call(func, args, kwargs, **params)
+
     def answer(self):
         call = self.event.call
-        call.speak_sentence('Hello from test application, press 1 to continue, '
-                            'we want to make sure that you are a human', gender='female', tag='human_validation')
+        self.async(call.speak_sentence,
+                   'Hello from test application, press 1 to continue, '
+                   'we want to make sure that you are a human', gender='female', tag='human_validation')
         return ''
 
     def dtmf(self):
         call = self.event.call
         if self.event.dtmf_digit == '1':
-            call.speak_sentence('Thank you.',
-                                gender='female', tag='greeting_done')
+            self.async(call.speak_sentence,
+                       'Thank you.', gender='female', tag='greeting_done')
         else:
-            call.speak_sentence('We are sorry your input is not valid. The call will be terminated',
-                                gender='female', tag='terminating')
+            self.async(call.speak_sentence,
+                       'We are sorry your input is not valid. The call will be terminated',
+                       gender='female', tag='terminating')
         return ''
 
     def speak(self):
@@ -77,24 +90,29 @@ class CallEvents(EventsHandler):
         call = self.event.call
         if event.tag == 'greeting_done':
             logger.debug('Starting dtmf gathering')
-            call.gather.create(max_digits='5',
-                               terminating_digits='*',
-                               inter_digit_timeout='7',
-                               prompt={'sentence': 'Please enter your 5 digit code', 'loop_enabled': True},
-                               tag='gather_started')
+            self.async(call.gather.create,
+                       max_digits='5',
+                       terminating_digits='*',
+                       inter_digit_timeout='7',
+                       prompt={'sentence': 'Please enter your 5 digit code', 'loop_enabled': True},
+                       tag='gather_started')
         elif event.tag == 'gather_complete':
-            Call.create(CALLER, BRIDGE_CALLEE,
-                        callback_url='http://{}{}'.format(DOMAIN, '/events/bridged'),
-                        tag='other-leg:{}'.format(call.call_id))
+            self.async(Call.create,
+                       CALLER,
+                       BRIDGE_CALLEE,
+                       callback_url='http://{}{}'.format(DOMAIN, '/events/bridged'),
+                       tag='other-leg:{}'.format(call.call_id))
         elif event.tag == 'terminating':
-            call.hangup()
+            self.async(call.hangup)
         return ''
 
     def gather(self):
-        self.event.gather.stop()
-        self.event.call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(self.event.digits),
-                                       gender='male',
-                                       tag='gather_complete')
+        future = self.async(self.event.gather.stop)
+        self.async(self.event.call.speak_sentence,
+                   'Thank you, your input was {}, this call will be bridged'.format(self.event.digits),
+                   gender='male',
+                   tag='gather_complete',
+                   depends_on=future)
         return ''
 
     def hangup(self):
@@ -104,12 +122,18 @@ class CallEvents(EventsHandler):
 
 class BridgedLegEvents(EventsHandler):
 
+    def async(self, func, args=None, kwargs=None, **params):
+        q = Queue('default', connection=conn)
+        return q.enqueue_call(func, args, kwargs, **params)
+
     def answer(self):
         """
         :return:
         """
         other_call_id = self.event.tag.split(':')[-1]
-        Bridge.create(self.event.call, Call(other_call_id))
+        self.async(Bridge.create,
+                   self.event.call,
+                   Call(other_call_id))
         return ''
 
     def hangup(self):
@@ -118,11 +142,12 @@ class BridgedLegEvents(EventsHandler):
         """
         other_call_id = self.event.tag.split(':')[-1]
         if self.event.cause == "CALL_REJECTED":
-            Call(other_call_id).speak_sentence('We are sorry, the user is reject your call',
-                                               gender='female',
-                                               tag='terminating')
+            self.async(Call(other_call_id).speak_sentence,
+                       'We are sorry, the user is reject your call',
+                       gender='female',
+                       tag='terminating')
         else:
-            Call(other_call_id).hangup()
+            self.async(Call(other_call_id).hangup)
         return ''
 
 

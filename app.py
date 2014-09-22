@@ -93,7 +93,7 @@ class CallEvents(EventsHandler):
 
     def gather(self):
         self.event.gather.stop()
-        self.event.call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(event.digits),
+        self.event.call.speak_sentence('Thank you, your input was {}, this call will be bridged'.format(self.event.digits),
                                        gender='male',
                                        tag='gather_complete')
         return ''

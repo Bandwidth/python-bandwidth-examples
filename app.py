@@ -55,10 +55,9 @@ class EventsHandler(View):
 class CallEvents(EventsHandler):
 
     def answer(self):
-        if self.event.tag:
-            call = self.event.call
-            call.speak_sentence('Hello from test application, press 1 to continue, '
-                                'we want to make sure that you are a human', gender='female', tag='human_validation')
+        call = self.event.call
+        call.speak_sentence('Hello from test application, press 1 to continue, '
+                            'we want to make sure that you are a human', gender='female', tag='human_validation')
         return ''
 
     def dtmf(self):

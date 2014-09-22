@@ -61,8 +61,9 @@ class EventsHandler(View):
 
 class CallEvents(EventsHandler):
 
-    def async(self, func, args=None, kwargs=None, **params):
+    def async(self, func, *args, **kwargs):
         q = Queue('default', connection=conn)
+        params = kwargs.pop('params', {})
         return q.enqueue_call(func, args, kwargs, **params)
 
     def answer(self):
@@ -112,7 +113,7 @@ class CallEvents(EventsHandler):
                    'Thank you, your input was {}, this call will be bridged'.format(self.event.digits),
                    gender='male',
                    tag='gather_complete',
-                   depends_on=future)
+                   params={'depends_on': future})
         return ''
 
     def hangup(self):

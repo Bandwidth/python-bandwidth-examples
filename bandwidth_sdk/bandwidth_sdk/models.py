@@ -32,7 +32,6 @@ class Gettable(object):
         return self.id
 
     def __setstate__(self, state):
-        print('%s restored' % self.__class__.__name__)
         self.id = state
         self.client = Client()
         return True
@@ -652,6 +651,14 @@ class Gather(Resource):
         url = '{}/{}'.format(self.path, self.id)
         data = to_api({'state': 'completed'})
         self.client.post(url, data=data)
+
+    def __getstate__(self):
+        return self.id, self.path
+
+    def __setstate__(self, state):
+        self.id, self.path = state
+        self.client = Client()
+        return True
 
 
 class Conference(AudioMixin, Gettable):

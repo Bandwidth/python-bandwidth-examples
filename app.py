@@ -153,8 +153,72 @@ class BridgedLegEvents(EventsHandler):
         return ''
 
 
+class DemoEvents(EventsHandler):
+
+    def async(self, func, *args, **kwargs):
+        q = Queue('default')
+        params = kwargs.pop('params', {})
+        return q.enqueue_call(func, args, kwargs, **params)
+
+    def answer(self):
+        call = self.event.call
+        self.async(call.speak_sentence, 'hello flipper', gender='female', tag='hello-state')
+        return ''
+
+    def speak(self):
+        event = self.event
+        if not event.done:
+            return ''
+        call = self.event.call
+        if event.tag == 'gather_complete':
+            self.async(Call.create,
+                       CALLER,
+                       BRIDGE_CALLEE,
+                       callback_url='http://{}{}'.format(DOMAIN, '/events/bridged'),
+                       tag='other-leg:{}'.format(call.call_id))
+        elif event.tag == 'terminating':
+            self.async(call.hangup)
+        elif event.tag == 'hello-state':
+            self.async(self.event.call.play_audio, 'dolphin.mp3',
+                       tag='dolphin-state')
+        return ''
+
+    def playback(self):
+        event = self.event
+        if not event.done and event.tag != 'dolphin-state':
+            return ''
+        self.async(event.call.gather.create,
+                   max_digits='5',
+                   terminating_digits='*',
+                   inter_digit_timeout='7',
+                   prompt={'sentence': 'Press 1 to connect with your fish, press 2 to disconnect',
+                           'loop_enabled': True},
+                   tag='gather_started')
+
+    def gather(self):
+        future = self.async(self.event.gather.stop)
+        if self.event.digits == '1':
+            self.async(self.event.call.speak_sentence,
+                       'Thank you, your input was {}, this call will be bridged'.format(self.event.digits),
+                       gender='male',
+                       tag='gather_complete',
+                       params={'depends_on': future})
+        else:
+            self.async(self.event.call.speak_sentence,
+                       'Invalid input, this call will be terminated',
+                       gender='male',
+                       tag='terminating',
+                       params={'depends_on': future})
+        return ''
+
+    def hangup(self):
+        # Creating cdr
+        return ''
+
+
 app.add_url_rule('/events', view_func=CallEvents.as_view('call_events'))
 app.add_url_rule('/events/bridged', view_func=BridgedLegEvents.as_view('bridged_call_events'))
+app.add_url_rule('/events/demo', view_func=DemoEvents.as_view('demo_call_events'))
 
 
 @app.route('/start/call', methods=['POST'])

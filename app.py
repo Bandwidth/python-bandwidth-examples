@@ -232,7 +232,7 @@ def start_call():
 
 
 @app.route('/start/demo', methods=['POST'])
-def start_call():
+def start_demo():
     inc = request.get_json()
     callee = inc.get('to')
     if not callee:

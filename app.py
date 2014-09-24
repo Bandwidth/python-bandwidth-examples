@@ -231,6 +231,17 @@ def start_call():
     return jsonify({}), 201
 
 
+@app.route('/start/demo', methods=['POST'])
+def start_call():
+    inc = request.get_json()
+    callee = inc.get('to')
+    if not callee:
+        return jsonify({'message': 'number field is required'}), 400
+    callback_url = 'http://{}{}'.format(DOMAIN, '/events/demo')
+    Call.create(CALLER, callee, recording_enabled=False, callback_url=callback_url)
+    return jsonify({}), 201
+
+
 # Error handlers.
 # @app.errorhandler(500)
 # def internal_error(error):

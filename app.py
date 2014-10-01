@@ -93,12 +93,7 @@ class DemoEvents(EventsHandler):
         elif event.tag == 'terminating':
             call.hangup()
         elif event.tag == 'hello-state':
-            # find the dolhin.mp3  media
-            medias = [m for m in Media.list() if m.media_name == 'dolphin.mp3']
-            if medias:
-                call.play_audio(medias[0].media_url, tag='dolphin-state')
-            else:
-                call.speak_sentence('We are sorry, media resource dolphin.mp3 is not found', tag='terminating')
+            call.play_audio(Media('dolphin.mp3').media_url, tag='dolphin-state')
         return jsonify({})
 
     def playback(self):

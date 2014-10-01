@@ -89,7 +89,8 @@ class DemoEvents(EventsHandler):
         elif event.tag == 'terminating':
             call.hangup()
         elif event.tag == 'hello-state':
-            self.event.call.play_audio('dolphin.mp3', tag='dolphin-state')
+            self.event.call.play_audio('https://api.catapult.inetwork.com/v1/'
+                                       'users/u-2qep46jwram5oyyqqa5muli/media/dolphin.mp3', tag='dolphin-state')
         return ''
 
     def playback(self):

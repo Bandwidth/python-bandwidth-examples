@@ -93,7 +93,7 @@ class DemoEvents(EventsHandler):
         elif event.tag == 'terminating':
             call.hangup()
         elif event.tag == 'hello-state':
-            call.play_audio(Media('dolphin.mp3').media_url, tag='dolphin-state')
+            call.play_audio(Media('dolphin.mp3').get_full_media_url(), tag='dolphin-state')
         return jsonify({})
 
     def playback(self):

@@ -7,7 +7,7 @@ import logging
 from flask import Flask, request, jsonify, url_for
 from flask.views import View
 
-from bandwidth_sdk import (Call, Event, Bridge)
+from bandwidth_sdk import (Call, Event, Bridge, Media)
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -28,6 +28,7 @@ logger.setLevel(logging.DEBUG)
 
 logging.basicConfig(level='DEBUG', format="%(levelname)s [%(name)s:%(lineno)s] %(message)s")
 
+
 # ----------------------------------------------------------------------------#
 # Controllers.
 # ----------------------------------------------------------------------------#
@@ -35,7 +36,8 @@ logging.basicConfig(level='DEBUG', format="%(levelname)s [%(name)s:%(lineno)s] %
 
 @app.route('/')
 def home():
-    return 'Its works'
+    ready_to_use = all((BRIDGE_CALLEE, DOMAIN, CALLER))
+    return 'This app is ready to use' if ready_to_use else 'Please set up environment variables for the app'
 
 
 @app.route('/start/demo', methods=['POST'])
@@ -58,7 +60,9 @@ class EventsHandler(View):
 
     def dispatch_request(self):
         try:
-            self.event = Event.create(**request.get_json())
+            data = request.get_json()
+            logger.debug('Event json: %s', data)
+            self.event = Event.create(**data)
         except Exception:
             return jsonify({'message': 'Malformed event'}), 400
         logger.debug(self.event)
@@ -66,7 +70,7 @@ class EventsHandler(View):
         return handler()
 
     def not_implemented(self):
-        return '', 200
+        return jsonify({}), 200
 
 
 class DemoEvents(EventsHandler):
@@ -74,12 +78,12 @@ class DemoEvents(EventsHandler):
     def answer(self):
         call = self.event.call
         call.speak_sentence('hello flipper', gender='female', tag='hello-state')
-        return ''
+        return jsonify({})
 
     def speak(self):
         event = self.event
         if not event.done:
-            return ''
+            return jsonify({})
         call = self.event.call
         if event.tag == 'gather_complete':
             Call.create(CALLER,
@@ -89,24 +93,30 @@ class DemoEvents(EventsHandler):
         elif event.tag == 'terminating':
             call.hangup()
         elif event.tag == 'hello-state':
-            self.event.call.play_audio('https://api.catapult.inetwork.com/v1/'
-                                       'users/u-2qep46jwram5oyyqqa5muli/media/dolphin.mp3', tag='dolphin-state')
-        return ''
+            # find the dolhin.mp3  media
+            medias = [m for m in Media.list() if m.media_name == 'dolphin.mp3']
+            if medias:
+                call.play_audio(medias[0].media_url, tag='dolphin-state')
+            else:
+                call.speak_sentence('We are sorry, media resource dolphin.mp3 is not found', tag='terminating')
+        return jsonify({})
 
     def playback(self):
         event = self.event
-        if not event.done and event.tag != 'dolphin-state':
-            return ''
-        event.call.gather.create(max_digits='5',
-                                 terminating_digits='*',
-                                 inter_digit_timeout='7',
-                                 prompt={'sentence': 'Press 1 to connect with your fish, press 2 to disconnect',
-                                         'loop_enabled': True},
-                                 tag='gather_started')
+        if event.tag == 'dolphin-state' and event.done:
+            event.call.gather.create(max_digits='5',
+                                     terminating_digits='*',
+                                     inter_digit_timeout='7',
+                                     prompt={'sentence': 'Press 1 to connect with your fish, press 2 to disconnect',
+                                             'loop_enabled': True},
+                                     tag='gather_started')
+        return jsonify({})
 
     def gather(self):
-        self.event.gather.stop()
-        if self.event.digits == '1':
+        if self.event.tag != 'gather_started':
+            return jsonify({})
+
+        if self.event.digits.startswith('1'):
             self.event.call.speak_sentence(
                 'Thank you, your input was {}, this call will be bridged'.format(self.event.digits),
                 gender='male',
@@ -115,11 +125,11 @@ class DemoEvents(EventsHandler):
             self.event.call.speak_sentence('Invalid input, this call will be terminated',
                                            gender='male',
                                            tag='terminating')
-        return ''
+        return jsonify({})
 
     def hangup(self):
         # Creating cdr
-        return ''
+        return jsonify({})
 
 
 class BridgedLegEvents(EventsHandler):
@@ -127,7 +137,7 @@ class BridgedLegEvents(EventsHandler):
     def answer(self):
         other_call_id = self.event.tag.split(':')[-1]
         Bridge.create(self.event.call, Call(other_call_id))
-        return ''
+        return jsonify({})
 
     def hangup(self):
         other_call_id = self.event.tag.split(':')[-1]
@@ -137,17 +147,11 @@ class BridgedLegEvents(EventsHandler):
                                                tag='terminating')
         else:
             Call(other_call_id).hangup()
-        return ''
+        return jsonify({})
 
 
 app.add_url_rule('/events/bridged', view_func=BridgedLegEvents.as_view('bridged_call_events'))
 app.add_url_rule('/events/demo', view_func=DemoEvents.as_view('demo_call_events'))
-
-
-# Error handlers.
-# @app.errorhandler(500)
-# def internal_error(error):
-#     return 'error occurred', 500
 
 
 @app.errorhandler(404)
@@ -160,4 +164,4 @@ def not_found_error(error):
 # ----------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

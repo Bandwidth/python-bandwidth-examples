@@ -68,7 +68,7 @@ It will:
 
 1. Speak sentence "hello flipper" - on answer of the incoming call
 2. Play audio dolphin.mp3
-3. Dtmf gather ("Press 1 to connect with your fish, press 2 to disconnect")
-4. On pressing ("1"), connect to a number (make this easy to change). Let the incoming call know you're connecting to the fish")
+3. Play ("Press 1 to connect with your fish, press 2 to disconnect") and wait for dtmf event
+4. On receiving ("1"), connect to a number (make this easy to change). Let the incoming call know you're connecting to the fish
 5. On answer (outgoing leg), whisper ('you have a dolphin on the line').
 6. Create a new call from bandwidth number to $BRIDGE_CALLEE and bridge it with yours.

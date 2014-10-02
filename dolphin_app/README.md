@@ -19,13 +19,29 @@ You need to have
 
         git clone https://github.com/bandwidthcom/python-bandwidth-examples.git
 
-        cd  python-bandwidth-examples
+        cd python-bandwidth-examples/dolphin_app
 
 2. Allocate new phone number in Bandwidth resource:
 
-        TBD
+    2.1. Setup client sdk instance with your Catapult credentials:
 
-        Upload dolphin.mp3
+        >>> from bandwidth_sdk import Client
+        >>> Client('u-user', 't-token', 's-secret')
+
+    2.2. Lookup for available number:
+
+        >>> from bandwidth_sdk import AvailableNumber
+        >>> available_numbers = AvailableNumber.list_local(city='San Francisco', state='CA')
+        >>> available_numbers[0].allocate()
+        PhoneNumber(number=+14158000000)
+
+    This is yours allocated phonenumber, we will use this number in next steps.
+
+    2.3 Also, you need to upload `dolphin.mp3` into yours media resources, for correct work of this example (This file existing in current directory).
+
+        >>> from bandwidth_sdk import Media
+        >>> Media('dolphin').upload('dolphin.mp3', file_path='dolphin.mp3')
+
 
 3. Create new heroku application:
 

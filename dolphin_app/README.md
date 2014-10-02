@@ -23,8 +23,13 @@ You need to have
 
 2. Allocate new phone number in Bandwidth resource:
 
+    2.0. Set up bandwidth sdk on local machine
+
+        pip install -e git+https://github.com/bandwidthcom/python-bandwidth.git#egg=bandwidth_sdk
+
     2.1. Setup client sdk instance with your Catapult credentials:
 
+        Run python interpreter
         >>> from bandwidth_sdk import Client
         >>> Client('u-user', 't-token', 's-secret')
 
@@ -40,7 +45,7 @@ You need to have
     2.3 Also, you need to upload `dolphin.mp3` into yours media resources, for correct work of this example (This file existing in current directory).
 
         >>> from bandwidth_sdk import Media
-        >>> Media('dolphin').upload('dolphin.mp3', file_path='dolphin.mp3')
+        >>> Media.upload('dolphin.mp3', file_path='dolphin.mp3')
 
 
 3. Create new heroku application:

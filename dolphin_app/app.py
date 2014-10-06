@@ -77,7 +77,7 @@ class DemoEvents(EventsHandler):
 
     def answer(self):
         call = self.event.call
-        call.speak_sentence('hello flipper', gender='female', tag='hello-state')
+        call.speak_sentence('hello flipper', voice='Kate', tag='hello-state')
         return jsonify({})
 
     def speak(self):
@@ -102,8 +102,10 @@ class DemoEvents(EventsHandler):
             event.call.gather.create(max_digits='5',
                                      terminating_digits='*',
                                      inter_digit_timeout='7',
-                                     prompt={'sentence': 'Press 1 to connect with your fish, press 2 to disconnect',
-                                             'loop_enabled': True},
+                                     prompt={'sentence': 'Press 1 to speak with the fish, press 2 to let it go',
+                                             'loop_enabled': True,
+                                             'voice': 'Kate',
+                                             },
                                      tag='gather_started')
         return jsonify({})
 
@@ -113,12 +115,12 @@ class DemoEvents(EventsHandler):
 
         if self.event.digits.startswith('1'):
             self.event.call.speak_sentence(
-                'Thank you, your input was {}, this call will be bridged'.format(self.event.digits),
-                gender='male',
+                'You have a dolphin on line 1. Watch out, he\'s hungry!',
+                voice='Kate',
                 tag='gather_complete')
         else:
-            self.event.call.speak_sentence('Invalid input, this call will be terminated',
-                                           gender='male',
+            self.event.call.speak_sentence('This call will be terminated',
+                                           voice='Kate',
                                            tag='terminating')
         return jsonify({})
 
@@ -138,7 +140,7 @@ class BridgedLegEvents(EventsHandler):
         other_call_id = self.event.tag.split(':')[-1]
         if self.event.cause == "CALL_REJECTED":
             Call(other_call_id).speak_sentence('We are sorry, the user is reject your call',
-                                               gender='female',
+                                               voice='Kate',
                                                tag='terminating')
         else:
             Call(other_call_id).hangup()

@@ -27,6 +27,8 @@ Set up bandwidth sdk on local machine
 ```console
 pip install -e git+https://github.com/bandwidthcom/python-bandwidth.git#egg=bandwidth_sdk
 ```
+Note: This may have to be run as `root` or with `--user` flag if you are not using python virtual environment.
+
 Setup client sdk instance with your Catapult credentials:
 ```python
 from bandwidth_sdk import Client
@@ -57,8 +59,8 @@ heroku apps:create
 Bandwidth credentials tier:
 ```console
 heroku config:set BANDWIDTH_USER_ID=u-user-id
-heroku config:set BANDWIDTH_SECRET=s-secret
-heroku config:set BANDWIDTH_TOKEN=t-token
+heroku config:set BANDWIDTH_API_SECRET=s-secret
+heroku config:set BANDWIDTH_API_TOKEN=t-token
 ```
 Web app tier:
 ```console
@@ -70,6 +72,9 @@ heroku config:set DOMAIN=your-app.herokuapp.com
 
 Push code to heroku:
 ```console
+git init
+git add .
+git commit -m "My app"
 git remote add heroku git@heroku.com:your-app.git
 git push heroku master:master
 ```

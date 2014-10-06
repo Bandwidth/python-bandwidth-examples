@@ -30,18 +30,19 @@ pip install -e git+https://github.com/bandwidthcom/python-bandwidth.git#egg=band
 Note: This may have to be run as `root` or with `--user` flag if you are not using python virtual environment.
 
 Setup client sdk instance with your Catapult credentials:
-```python
-from bandwidth_sdk import Client
-Client('u-user', 't-token', 's-secret')
+```console
+export BANDWIDTH_USER_ID=u-your-user-id
+export BANDWIDTH_API_TOKEN=t-your-token
+export BANDWIDTH_API_SECRET=s-your-secret
 ```
-Lookup for available number:
+Lookup for available number using python interpreter:
 ```python
 >>> from bandwidth_sdk import AvailableNumber
 >>> available_numbers = AvailableNumber.list_local(city='San Francisco', state='CA')
 >>> available_numbers[0].allocate()
 PhoneNumber(number=+14158000000)
 ```
-This is yours allocated phonenumber, we will use this number in next steps.
+This is yours allocated phone number, we will use this number in next steps.
 
 Also, you need to upload `dolphin.mp3` into yours media resources, for correct work of this example (This file existing in current directory).
 ```python
@@ -59,13 +60,13 @@ heroku apps:create
 Bandwidth credentials tier:
 ```console
 heroku config:set BANDWIDTH_USER_ID=u-user-id
-heroku config:set BANDWIDTH_API_SECRET=s-secret
 heroku config:set BANDWIDTH_API_TOKEN=t-token
+heroku config:set BANDWIDTH_API_SECRET=s-secret
 ```
 Web app tier:
 ```console
 heroku config:set BRIDGE_CALLEE=+YOUR-NUMBER
-heroku config:set CALLER_NUMBER=+ALOCATED-NUMBER
+heroku config:set CALLER_NUMBER=+ALLOCATED-NUMBER
 heroku config:set DOMAIN=your-app.herokuapp.com
 ```
 ##  Deploy

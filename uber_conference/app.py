@@ -130,10 +130,10 @@ class ConferenceHandler(EventsHandler):
 
     def conference(self):
         conference = self.event.conference
-        if self.event.status == 'started':
+        if self.event.status == 'created':
             redis.set('active-conf-{}'.format(conference.from_), conference.id)
             logger.debug('Conference was saved to redis.')
-        elif self.event.status == 'done':
+        elif self.event.status == 'completed':
             redis.delete('active-conf-{}'.format(conference.from_))
             logger.debug('Conference was deleted from redis storage.')
         return jsonify({})
@@ -143,7 +143,6 @@ class ConferenceHandler(EventsHandler):
 
     def conference_speak(self):
         return jsonify({})
-
 
 app.add_url_rule('/events/first_member', view_func=FirstMemberHandler.as_view('first_member_events'))
 app.add_url_rule('/events/other_call_events', view_func=CallHandler.as_view('demo_call_events'))

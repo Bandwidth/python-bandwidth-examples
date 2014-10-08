@@ -31,23 +31,23 @@ Note: This may have to be run as `root` or with `--user` flag if you are not usi
 
 Setup client sdk instance with your Catapult credentials:
 ```console
-export BANDWIDTH_USER_ID=u-your-user-id
-export BANDWIDTH_API_TOKEN=t-your-token
-export BANDWIDTH_API_SECRET=s-your-secret
+export BANDWIDTH_USER_ID='u-your-user-id'
+export BANDWIDTH_API_TOKEN='t-your-token'
+export BANDWIDTH_API_SECRET='s-your-secret'
 ```
 Lookup for available number using python interpreter:
 ```python
->>> from bandwidth_sdk import AvailableNumber
->>> available_numbers = AvailableNumber.list_local(city='San Francisco', state='CA')
->>> available_numbers[0].allocate()
-PhoneNumber(number=+14158000000)
+from bandwidth_sdk import AvailableNumber
+available_numbers = AvailableNumber.list_local(city='San Francisco', state='CA')
+available_numbers[0].allocate()
+>>> PhoneNumber(number=+14158000000)
 ```
 This is yours allocated phone number, we will use this number in next steps.
 
 Also, you need to upload `dolphin.mp3` into yours media resources, for correct work of this example (This file existing in current directory).
 ```python
->>> from bandwidth_sdk import Media
->>> Media.upload('dolphin.mp3', file_path='dolphin.mp3')
+from bandwidth_sdk import Media
+Media.upload('dolphin.mp3', file_path='dolphin.mp3')
 ```
 
 #### Create new heroku application:
@@ -55,13 +55,22 @@ Also, you need to upload `dolphin.mp3` into yours media resources, for correct w
 heroku apps:create
 > Created http://your-app.herokuapp.com/ | git@heroku.com:your-app.git
 ```
+
+#### Initialize git
+```console
+git init
+git add .
+git commit -m "My app"
+git remote add heroku git@heroku.com:your-app.git
+```
+
 #### Set up heroku environment variables:
 
 Bandwidth credentials tier:
 ```console
-heroku config:set BANDWIDTH_USER_ID=u-user-id
-heroku config:set BANDWIDTH_API_TOKEN=t-token
-heroku config:set BANDWIDTH_API_SECRET=s-secret
+heroku config:set BANDWIDTH_USER_ID=$BANDWIDTH_USER_ID
+heroku config:set BANDWIDTH_API_TOKEN=$BANDWIDTH_API_TOKEN
+heroku config:set BANDWIDTH_API_SECRET=$BANDWIDTH_API_SECRET
 ```
 Web app tier:
 ```console
@@ -73,10 +82,6 @@ heroku config:set DOMAIN=your-app.herokuapp.com
 
 Push code to heroku:
 ```console
-git init
-git add .
-git commit -m "My app"
-git remote add heroku git@heroku.com:your-app.git
 git push heroku master:master
 ```
 

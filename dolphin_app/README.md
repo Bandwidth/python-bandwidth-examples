@@ -10,7 +10,9 @@ You need to have
     - Python (2.7, 3.3, 3.4)
     - Bandwidth Application Platform account
     - pip
-    - Heroku account and installed heroku Heroku Toolbelt
+    - Heroku account and installed Heroku Toolbelt
+      or
+      AWS account and installed AWS Elastic Beanstalk Command Line Tool.
 
 
 ## Setup
@@ -38,6 +40,7 @@ export BANDWIDTH_API_SECRET='s-your-secret'
 Lookup for available number using python interpreter:
 ```python
 from bandwidth_sdk import AvailableNumber
+
 available_numbers = AvailableNumber.list_local(city='San Francisco', state='CA')
 available_numbers[0].allocate()
 >>> PhoneNumber(number=+14158000000)
@@ -47,13 +50,8 @@ This is yours allocated phone number, we will use this number in next steps.
 Also, you need to upload `dolphin.mp3` into yours media resources, for correct work of this example (This file existing in current directory).
 ```python
 from bandwidth_sdk import Media
-Media.upload('dolphin.mp3', file_path='dolphin.mp3')
-```
 
-#### Create new heroku application:
-```console
-heroku apps:create
-> Created http://your-app.herokuapp.com/ | git@heroku.com:your-app.git
+Media.upload('dolphin.mp3', file_path='dolphin.mp3')
 ```
 
 #### Initialize git
@@ -61,6 +59,19 @@ heroku apps:create
 git init
 git add .
 git commit -m "My app"
+```
+
+##  Deploying to heroku
+
+
+#### Create new heroku application:
+```console
+heroku apps:create
+> Created http://your-app.herokuapp.com/ | git@heroku.com:your-app.git
+```
+
+#### Add remote git repository
+```console
 git remote add heroku git@heroku.com:your-app.git
 ```
 
@@ -78,11 +89,10 @@ heroku config:set BRIDGE_CALLEE=+YOUR-NUMBER
 heroku config:set CALLER_NUMBER=+ALLOCATED-NUMBER
 heroku config:set DOMAIN=your-app.herokuapp.com
 ```
-##  Deploy
 
 Push code to heroku:
 ```console
-git push heroku master:master
+git push heroku master
 ```
 
 Add a web dyno
@@ -95,11 +105,28 @@ Make sure that all went well:
 heroku logs -t
 ```
 
+##  Deploying to  AWS
+
+You will need an AWS account with access to the  [AWS Elastic Beanstalk](http://aws.amazon.com/elasticbeanstalk)
+
+We really recommend to follow [Deploying a Flask Application to AWS Elastic Beanstalk](http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_Python_flask.html) instructions.
+
+Additionally you need to set up environment variables:
+
+```console
+BANDWIDTH_USER_ID=your-id
+BANDWIDTH_API_TOKEN=your-token
+BANDWIDTH_API_SECRET=your-secret
+BRIDGE_CALLEE=+YOUR-NUMBER
+CALLER_NUMBER=+ALLOCATED-NUMBER
+DOMAIN=your-application-domain.com
+```
+
 ## Demo
 
 Start incoming call from command line:
 ```console
-curl -d '{"to": "+YOUR-NUMBER"}' http://your-app.herokuapp.com/start/demo --header "Content-Type:application/json"
+curl -d '{"to": "+YOUR-NUMBER"}' http://your-app.com/start/demo --header "Content-Type:application/json"
 ```
 
 It will:

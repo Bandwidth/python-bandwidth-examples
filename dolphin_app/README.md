@@ -117,7 +117,7 @@ Additionally you need to set up environment variables:
 BANDWIDTH_USER_ID=your-id
 BANDWIDTH_API_TOKEN=your-token
 BANDWIDTH_API_SECRET=your-secret
-BRIDGE_CALLEE=+YOUR-NUMBER
+BRIDGE_CALLEE=+YOUR-NUMBER-FOR-CALL-LEG#2
 CALLER_NUMBER=+ALLOCATED-NUMBER
 DOMAIN=your-application-domain.com
 ```
@@ -126,7 +126,7 @@ DOMAIN=your-application-domain.com
 
 Start incoming call from command line:
 ```console
-curl -d '{"to": "+YOUR-NUMBER"}' http://your-app.com/start/demo --header "Content-Type:application/json"
+curl -d '{"to": "+YOUR-NUMBER-FOR-CALL-LEG#1"}' http://your-app.com/start/demo --header "Content-Type:application/json"
 ```
 
 It will:

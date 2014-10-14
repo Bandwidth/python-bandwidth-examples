@@ -14,7 +14,7 @@ from bandwidth_sdk import (Call, Event, Bridge, Media)
 # ----------------------------------------------------------------------------#
 
 app = Flask(__name__)
-
+application = app  # Elastic Beanstalk deploy
 
 CALLER = os.getenv('CALLER_NUMBER')
 
@@ -161,4 +161,4 @@ def not_found_error(error):
 # ----------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')

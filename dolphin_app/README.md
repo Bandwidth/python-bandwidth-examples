@@ -85,7 +85,7 @@ heroku config:set BANDWIDTH_API_SECRET=$BANDWIDTH_API_SECRET
 ```
 Web app tier:
 ```console
-heroku config:set BRIDGE_CALLEE=+YOUR-NUMBER
+heroku config:set BRIDGE_CALLEE=+YOUR-NUMBER-FOR-CALL-LEG#2
 heroku config:set CALLER_NUMBER=+ALLOCATED-NUMBER
 heroku config:set DOMAIN=your-app.herokuapp.com
 ```

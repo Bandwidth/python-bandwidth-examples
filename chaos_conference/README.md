@@ -19,7 +19,7 @@ You need to have
 
 ```console
 git clone https://github.com/bandwidthcom/python-bandwidth-examples.git
-cd python-bandwidth-examples/uber_conference
+cd python-bandwidth-examples/chaos_conference
 ```
 #### Allocate new phone number in Bandwidth resource
 

@@ -1,4 +1,4 @@
-# Uber Conference
+# Chaos Conference
 
 Simple Flask application for handling conference calls usage  [bandwidth python sdk](https://github.com/bandwidthcom/python-bandwidth).
 

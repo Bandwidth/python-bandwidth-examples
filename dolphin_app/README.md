@@ -1,6 +1,6 @@
 # Dolphin app
 
-Simple Flask application for handling calls usage  [bandwidth python sdk](https://github.com/bandwidthcom/python-bandwidth).
+Simple Flask application for handling calls using the [Bandwidth Python SDK](https://github.com/bandwidthcom/python-bandwidth).
 
 
 ## Getting started
@@ -23,21 +23,21 @@ You need to have
 git clone https://github.com/bandwidthcom/python-bandwidth-examples.git
 cd python-bandwidth-examples/dolphin_app
 ```
-#### Allocate new phone number in Bandwidth resource
+#### Allocate a new phone number in Bandwidth resource
 
-Set up bandwidth sdk on local machine
+Set up the Bandwidth Python SDK on your development environment
 ```console
 pip install -e git+https://github.com/bandwidthcom/python-bandwidth.git#egg=bandwidth_sdk
 ```
-Note: This may have to be run as `root` or with `--user` flag if you are not using python virtual environment.
+Note: This may have to be run as `root` or with the `--user` flag if you are not using python virtual environment.
 
-Setup client sdk instance with your Catapult credentials:
+Setup the client SDK environment with your Catapult credentials:
 ```console
 export BANDWIDTH_USER_ID='u-your-user-id'
 export BANDWIDTH_API_TOKEN='t-your-token'
 export BANDWIDTH_API_SECRET='s-your-secret'
 ```
-Lookup for available number using python interpreter:
+Allocate a new number using the python interpreter:
 ```python
 from bandwidth_sdk import AvailableNumber
 
@@ -45,9 +45,9 @@ available_numbers = AvailableNumber.list_local(city='San Francisco', state='CA')
 available_numbers[0].allocate()
 >>> PhoneNumber(number=+14158000000)
 ```
-This is yours allocated phone number, we will use this number in next steps.
+This is your allocated phone number, we will use this number in next steps.
 
-Also, you need to upload `dolphin.mp3` into yours media resources, for correct work of this example (This file existing in current directory).
+Also, you will need to upload `dolphin.mp3` into your media resources for this example to work correctly (This file exists in the current directory).
 ```python
 from bandwidth_sdk import Media
 
@@ -64,26 +64,32 @@ git commit -m "My app"
 ##  Deploying to heroku
 
 
-#### Create new heroku application:
+#### Create a new heroku application:
 ```console
 heroku apps:create
 > Created http://your-app.herokuapp.com/ | git@heroku.com:your-app.git
+'''
+
+You may also see:
+'''
+> Git remote heroku added
 ```
+This means a git remote called heroku was automatically added to your git repository.  If so you may skip the next step.
 
 #### Add remote git repository
 ```console
 git remote add heroku git@heroku.com:your-app.git
 ```
 
-#### Set up heroku environment variables:
+#### Set up the heroku environment variables:
 
-Bandwidth credentials tier:
+Bandwidth credentials:
 ```console
 heroku config:set BANDWIDTH_USER_ID=$BANDWIDTH_USER_ID
 heroku config:set BANDWIDTH_API_TOKEN=$BANDWIDTH_API_TOKEN
 heroku config:set BANDWIDTH_API_SECRET=$BANDWIDTH_API_SECRET
 ```
-Web app tier:
+Web app settings:
 ```console
 heroku config:set BRIDGE_CALLEE=+YOUR-NUMBER-FOR-CALL-LEG#2
 heroku config:set CALLER_NUMBER=+ALLOCATED-NUMBER
@@ -105,13 +111,13 @@ Make sure that all went well:
 heroku logs -t
 ```
 
-##  Deploying to  AWS
+##  Deploying to AWS
 
-You will need an AWS account with access to the  [AWS Elastic Beanstalk](http://aws.amazon.com/elasticbeanstalk)
+You will need an AWS account with access to the [AWS Elastic Beanstalk](http://aws.amazon.com/elasticbeanstalk)
 
-We really recommend to follow [Deploying a Flask Application to AWS Elastic Beanstalk](http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_Python_flask.html) instructions.
+We highly recommend you follow the [Deploying a Flask Application to AWS Elastic Beanstalk](http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_Python_flask.html) instructions.
 
-Additionally you need to set up environment variables:
+Additionally you need to set the following environment variables:
 
 ```console
 BANDWIDTH_USER_ID=your-id
@@ -124,16 +130,15 @@ DOMAIN=your-application-domain.com
 
 ## Demo
 
-Start incoming call from command line:
+Start an incoming call from the command line:
 ```console
 curl -d '{"to": "+YOUR-NUMBER-FOR-CALL-LEG#1"}' http://your-app.com/start/demo --header "Content-Type:application/json"
 ```
 
 It will:
 
-1. Speak sentence "hello flipper" - on answer of the incoming call
-2. Play audio dolphin.mp3
-3. Play ("Press 1 to connect with your fish, press 2 to disconnect") and wait for dtmf event
-4. On receiving ("1"), connect to a number (make this easy to change). Let the incoming call know you're connecting to the fish
-5. On answer (outgoing leg), whisper ('you have a dolphin on the line').
-6. Create a new call from bandwidth number to $BRIDGE_CALLEE and bridge it with yours.
+1. Create a call from $CALLER_NUMBER to the number specified on the command line.
+2. Once connected play the audio in dolphin.mp3.
+2. Play ("Press 1 to speak with the fish, 2 to let it go") in a loop, waiting for a DTMF event.
+3. On receiving ("2") - Play ("This call will be terminated") and disconnect the call.
+4. On receiving ("1") - Play ("You have a dolphin on line 1, watch out, he's hungry.") then create a new call from $CALLER_NUMBER to $BRIDGE_CALLEE number and bridge the call with the original call.

@@ -7,7 +7,7 @@ import logging
 from flask import Flask, request, jsonify, url_for
 from flask.views import View
 
-from bandwidth_sdk import (Call, Event, Bridge, Media, get_client)
+from bandwidth_sdk import (Call, Event, Bridge, Media, get_client, Client)
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -28,6 +28,8 @@ logger.setLevel(logging.DEBUG)
 
 logging.basicConfig(level='DEBUG', format="%(levelname)s [%(name)s:%(lineno)s] %(message)s")
 
+# Alternative client setup
+# Client('u-**********', 't-******', 's-********')
 
 # ----------------------------------------------------------------------------#
 # Controllers.

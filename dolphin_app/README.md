@@ -37,6 +37,17 @@ export BANDWIDTH_USER_ID='u-your-user-id'
 export BANDWIDTH_API_TOKEN='t-your-token'
 export BANDWIDTH_API_SECRET='s-your-secret'
 ```
+
+or explicitly set up in the code/interpreter as an alternative way:
+
+```python
+from bandwidth_sdk import Client
+Client('u-user', 't-token', 's-secret')
+```
+Note: if you going to follow this way you should uncomment [application.py:32](https://github.com/bandwidthcom/python-bandwidth-examples/blob/master/dolphin_app/application.py#L32) 
+line and put your credential there.
+You also be able to skip bandwidth credentials setup part in next steps.
+
 Allocate a new number using the python interpreter:
 ```python
 from bandwidth_sdk import AvailableNumber
@@ -117,7 +128,7 @@ You will need an AWS account with access to the [AWS Elastic Beanstalk](http://a
 
 We highly recommend you follow the [Deploying a Flask Application to AWS Elastic Beanstalk](http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_Python_flask.html) instructions.
 
-Additionally you need to set the following environment variables:
+Additionally you need to set the following environment variables (recommended throw web dashboard):
 
 ```console
 BANDWIDTH_USER_ID=your-id
@@ -129,7 +140,7 @@ DOMAIN=your-application-domain.com
 ```
 
 ## Demo
-Check app configuration from the command line:
+#### Check app configuration from the command line:
 
 ```console
 curl http://your-app.com
@@ -143,7 +154,7 @@ This app is ready to use
 otherwise you need to check environment variables.
 
 
-Start an incoming call:
+#### Start an incoming call:
 ```console
 curl -d '{"to": "+YOUR-NUMBER-FOR-CALL-LEG#1"}' http://your-app.com/start/demo --header "Content-Type:application/json"
 ```

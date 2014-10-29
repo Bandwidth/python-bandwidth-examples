@@ -113,7 +113,10 @@ class DemoEvents(EventsHandler):
         if self.event.tag != 'gather_started':
             return jsonify({})
 
-        if self.event.digits.startswith('1'):
+        if self.event.reason == 'hung-up':
+            # call is ended
+            return jsonify({})
+        elif self.event.digits.startswith('1'):
             self.event.call.speak_sentence(
                 'Please stay on the line. Your call is being connected.',
                 voice='Kate',

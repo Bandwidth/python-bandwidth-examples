@@ -129,8 +129,21 @@ DOMAIN=your-application-domain.com
 ```
 
 ## Demo
+Check app configuration from the command line:
 
-Start an incoming call from the command line:
+```console
+curl http://your-app.com
+```
+You should see the following message
+
+```
+This app is ready to use
+```
+
+otherwise you need to check environment variables.
+
+
+Start an incoming call:
 ```console
 curl -d '{"to": "+YOUR-NUMBER-FOR-CALL-LEG#1"}' http://your-app.com/start/demo --header "Content-Type:application/json"
 ```

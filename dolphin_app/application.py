@@ -7,7 +7,7 @@ import logging
 from flask import Flask, request, jsonify, url_for
 from flask.views import View
 
-from bandwidth_sdk import (Call, Event, Bridge, Media)
+from bandwidth_sdk import (Call, Event, Bridge, Media, get_client, Client)
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -28,6 +28,8 @@ logger.setLevel(logging.DEBUG)
 
 logging.basicConfig(level='DEBUG', format="%(levelname)s [%(name)s:%(lineno)s] %(message)s")
 
+# Alternative client setup
+# Client('u-**********', 't-******', 's-********')
 
 # ----------------------------------------------------------------------------#
 # Controllers.
@@ -36,8 +38,22 @@ logging.basicConfig(level='DEBUG', format="%(levelname)s [%(name)s:%(lineno)s] %
 
 @app.route('/')
 def home():
-    ready_to_use = all((BRIDGE_CALLEE, DOMAIN, CALLER))
-    return 'This app is ready to use' if ready_to_use else 'Please set up environment variables for the app'
+    try:
+        client = get_client()
+    except:
+        client = None
+    values = (BRIDGE_CALLEE, CALLER, DOMAIN, client)
+    if all(values):
+        return 'This app is ready to use'
+    wrap = lambda val: 'ok' if val else 'unconfigured'
+    status = """Improperly configured
+    CALLER: [{}]
+    BRIDGE_CALLEE: [{}]
+    DOMAIN: [{}]
+    SDK: [{}]
+    """.format(*[wrap(val) for val in values])
+
+    return status
 
 
 @app.route('/start/demo', methods=['POST'])

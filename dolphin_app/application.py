@@ -115,7 +115,7 @@ class DemoEvents(EventsHandler):
 
         if self.event.digits.startswith('1'):
             self.event.call.speak_sentence(
-                'You have a dolphin on line 1. Watch out, he\'s hungry!',
+                'Please stay on the line. Your call is being connected.',
                 voice='Kate',
                 tag='gather_complete')
         else:
@@ -133,7 +133,19 @@ class BridgedLegEvents(EventsHandler):
 
     def answer(self):
         other_call_id = self.event.tag.split(':')[-1]
-        Bridge.create(self.event.call, Call(other_call_id))
+        self.event.call.speak_sentence(
+            'You have a dolphin on line 1. Watch out, he\'s hungry!',
+            voice='Kate',
+            tag='warning:{}'.format(other_call_id))
+        return jsonify({})
+
+    def speak(self):
+        event = self.event
+        if not event.done:
+            return jsonify({})
+        if event.tag.startswith('warning'):
+            other_call_id = event.tag.split(':')[-1]
+            Bridge.create(event.call, Call(other_call_id))
         return jsonify({})
 
     def hangup(self):

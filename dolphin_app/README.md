@@ -104,7 +104,7 @@ heroku config:set BANDWIDTH_API_SECRET=$BANDWIDTH_API_SECRET --app <your-app-nam
 
 Web app settings:
 ```console
-heroku config:set BRIDGE_CALLEE=<+your-number-for-call-lef#2> --app <your-app-name>
+heroku config:set BRIDGE_CALLEE=<+your-number-for-call-leg#2> --app <your-app-name>
 heroku config:set CALLER_NUMBER=<+your-allocated-number> --app <your-app-name>
 heroku config:set DOMAIN=<your-app>.herokuapp.com --app <your-app-name>
 ```
@@ -176,7 +176,7 @@ sudo pip install Flask
 export BANDWIDTH_USER_ID=<your-user-id>
 export BANDWIDTH_API_TOKEN=<your-token>
 export BANDWIDTH_API_SECRET=<your-secret>
-export BRIDGE_CALLEE=<+your-number-for-call-lef#2>
+export BRIDGE_CALLEE=<+your-number-for-call-leg#2>
 export CALLER_NUMBER=<+your-allocated-number>
 export DOMAIN=<your-ngrok-forwarding-dns>
 ```

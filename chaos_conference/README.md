@@ -95,9 +95,11 @@ curl -d '{"to": "+YOUR-NUMBER"}' http://<your-app>.herokuapp.com/start/demo --he
 ```
 
 It will:
-1. Create a call to "YOUR-NUMBER"
-2. Place your call in a conference hosted by the "CONFERENCE_NUMBER"
-3. Play an audio to inform that you are the first member in the conference
+
+1. Create a call to "YOUR-NUMBER".
+2. Place your call in a conference hosted by the "CONFERENCE_NUMBER".
+3. Play an audio to inform that you are the first member in the conference.
+
 
 
 ## Local Setup
@@ -110,7 +112,7 @@ unzip /path/to/ngrok.zip
 ./ngrok http 5000
 ```
 
-The ngrok will create a Fowarding DNS to your localhost. You will need the Fowarding DNS to setup on environment variable.
+The ngrok will create a Forwarding DNS to your localhost. You will need the DNS to setup on environment variable.
 
 #### Install python dependences
 ```console
@@ -123,11 +125,17 @@ sudo pip install Flask
 export BANDWIDTH_USER_ID=<your-user-id>
 export BANDWIDTH_API_TOKEN=<your-token>
 export BANDWIDTH_API_SECRET=<your-secret>
-export DOMAIN=<your-ngrok-fowarding-dns>
+export DOMAIN=<your-ngrok-forwarding-dns>
 export CONFERENCE_NUMBER=<+your-allocated-nuymber>
 ```
 
 #### Initiate the application
 ```console
 python app.py
+```
+
+#### Initiate the test
+Start incoming call from command line:
+```console
+curl -d '{"to": "+YOUR-NUMBER"}' http://<your-ngrok-forwarding-dns>/start/demo --header "Content-Type:application/json"
 ```

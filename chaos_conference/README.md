@@ -1,6 +1,6 @@
 # Chaos Conference
 
-Simple Flask application for handling conference calls using [bandwidth python sdk](https://github.com/bandwidthcom/python-bandwidth).
+Simple Flask application for handling conference calls using [Bandwidth Python SDK](https://github.com/bandwidthcom/python-bandwidth).
 
 
 ## Getting started
@@ -33,7 +33,7 @@ cd -
 Note: This may have to be run as `root` or with `--user` flag if you are not using python virtual environment.
 
 
-Setup client sdk instance with your Catapult credentials:
+Setup client SDK instance with your Catapult credentials:
 ```console
 export BANDWIDTH_USER_ID=<your-user-id>
 export BANDWIDTH_API_TOKEN=<your-token>
@@ -53,7 +53,7 @@ Now you have an allocated number that will host the conference. We will use it i
 heroku apps:create
 > Created http://<your-app-name>.herokuapp.com/ | git@heroku.com:<your-app-name>.git
 ```
-#### Set up Heroku environment variables:
+#### Setup Heroku environment variables:
 
 Bandwidth credentials tier:
 ```console
@@ -102,6 +102,7 @@ It will:
 
 
 
+
 ## Local Setup
 
 #### Installing ngrok tool (For local tests):
@@ -134,7 +135,6 @@ export CONFERENCE_NUMBER=<+your-allocated-nuymber>
 python app.py
 ```
 
-#### Initiate the test
 Start incoming call from command line:
 ```console
 curl -d '{"to": "+YOUR-NUMBER"}' http://<your-ngrok-forwarding-dns>/start/demo --header "Content-Type:application/json"

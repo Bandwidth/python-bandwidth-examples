@@ -55,13 +55,13 @@ heroku apps:create
 ```
 #### Setup Heroku environment variables:
 
-Bandwidth credentials tier:
+Bandwidth credentials settings:
 ```console
-heroku config:set BANDWIDTH_USER_ID=<your-user-id> --app <your-heroku-app-name>
-heroku config:set BANDWIDTH_API_TOKEN=<your-token> --app <your-heroku-app-name>
-heroku config:set BANDWIDTH_API_SECRET=<your-secret> --app <your-heroku-app-name>
+heroku config:set BANDWIDTH_USER_ID=$BANDWIDTH_USER_ID --app <your-app-name>
+heroku config:set BANDWIDTH_API_TOKEN=$BANDWIDTH_API_TOKEN --app <your-app-name>
+heroku config:set BANDWIDTH_API_SECRET=$BANDWIDTH_API_SECRET --app <your-app-name>
 ```
-Web app tier:
+Web application settings:
 ```console
 heroku config:set CONFERENCE_NUMBER=<+your-allocated-nuymber> --app <your-heroku-app-name>
 heroku config:set DOMAIN=<your-app-name>.herokuapp.com --app <your-heroku-app-name>

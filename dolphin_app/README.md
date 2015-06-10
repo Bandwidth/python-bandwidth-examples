@@ -102,7 +102,7 @@ heroku config:set BANDWIDTH_API_TOKEN=$BANDWIDTH_API_TOKEN --app <your-app-name>
 heroku config:set BANDWIDTH_API_SECRET=$BANDWIDTH_API_SECRET --app <your-app-name>
 ```
 
-Web app settings:
+Web application settings:
 ```console
 heroku config:set BRIDGE_CALLEE=<+your-number-for-call-leg#2> --app <your-app-name>
 heroku config:set CALLER_NUMBER=<+your-allocated-number> --app <your-app-name>
@@ -151,6 +151,7 @@ It will:
 2. Play ("Press 1 to speak with the dolphin, 2 to let it go") in a loop, waiting for a DTMF event.
 3. On receiving ("2") - Play ("This call will be terminated") and disconnect the call.
 4. On receiving ("1") - Play ("You have a dolphin on line 1, watch out, he's hungry.") then create a new call from $CALLER_NUMBER to $BRIDGE_CALLEE number and bridge the call with the original call.
+
 
 
 ## Local Setup

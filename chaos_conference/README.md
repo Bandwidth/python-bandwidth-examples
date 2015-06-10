@@ -95,10 +95,12 @@ curl -d '{"to": "+YOUR-NUMBER"}' http://<your-app>.herokuapp.com/start/demo --he
 ```
 
 It will:
-    Create a call to "YOUR-NUMBER"
-    Place your call in a conference hosted by the "CONFERENCE_NUMBER"
-    Play an audio to inform that you are the first member in the conference
+1. Create a call to "YOUR-NUMBER"
+2. Place your call in a conference hosted by the "CONFERENCE_NUMBER"
+3. Play an audio to inform that you are the first member in the conference
 
+
+## Local Setup
 
 #### Installing ngrok tool (For local tests):
 
